@@ -14,4 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use quantifier to switch path styles
 - Override backend with custom options.
 
+### Fixed
+
+- Fix `tty` output reading
+
+### Removed
+
+- Remove `$TTY` envrionment variable checking
+
 [Unreleased]: https://github.com/laggardkernel/ranger-oscyank/compare/7debe09...HEAD
