@@ -114,7 +114,7 @@ class oscyank(yank):
 
     def do_prefer_osc(self):
         explicit_backend = self.fm.settings._settings.get("oscyank:backend", "auto")
-        if explicit_backend == "osc52":
+        if explicit_backend in ("osc52", "osc"):
             return True
         elif explicit_backend == "manager":
             return False
@@ -195,12 +195,15 @@ class oscyank(yank):
         return tmux_tty
 
     def get_tty(self):
-        if "TTY" in os.environ:  # ZSH
-            return os.environ.get("TTY")
-
+        tty = None
         try:
             tty = subprocess.check_output(["tty"]).strip()
+            if tty == "not a tty":
+                tty = None
         except subprocess.CalledProcessError:
+            pass
+
+        if not tty:
             if "TMUX" in os.environ:
                 tty = self.get_tty_from_tmux()
             else:
