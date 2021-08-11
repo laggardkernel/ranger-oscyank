@@ -29,6 +29,7 @@ map y. oscyank name_without_extension
 
 ## Features
 
+### Backend Switch
 `oscyank` supports two backends:
 
 - system clipboard manager tools, like `pbcopy`, `wl-copy`, `xclip`, `xsel`.
@@ -49,6 +50,8 @@ set_oscyank backend osc52
 # or
 set_oscyank backend manager
 ```
+
+### Quantifier
 
 Switch path styles copied with quantifiers:
 

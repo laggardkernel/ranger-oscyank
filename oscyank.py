@@ -2,10 +2,8 @@ from __future__ import absolute_import, division, print_function
 import os
 import subprocess
 
-from ranger.api.commands import Command
-
-# from ranger.config.commands import yank
-from ranger.config.commands import set_
+# from ranger.api.commands import Command
+from ranger.config.commands import yank, set_
 
 
 class TTYNotFound(Exception):
@@ -59,21 +57,13 @@ class set_oscyank(set_):
         return value
 
 
-class oscyank(Command):
+class oscyank(yank):
     """:oscyank [name|dir|path]
 
     Copies the file's name (default), directory or path into system clipboard
     with OSC 52 support. Fallbacks to default 'yank' command which uses
     the primary X selection and the clipboard.
     """
-
-    modes = {
-        "": "basename",
-        "name_without_extension": "basename_without_extension",
-        "name": "basename",
-        "dir": "dirname",
-        "path": "path",
-    }
 
     def execute(self):
         # TODO: Any way to detect OSC 52 support from terminal?
@@ -217,12 +207,6 @@ class oscyank(Command):
                 self.fm.notify("No available tty is found!", bad=True)
                 raise TTYNotFound
         return tty
-
-    def get_selection_attr(self, attr):
-        return [getattr(item, attr) for item in self.fm.thistab.get_selection()]
-
-    def tab(self, tabnum):
-        return (self.start(1) + mode for mode in sorted(self.modes.keys()) if mode)
 
 
 # References
