@@ -2,8 +2,8 @@
 
 [![License: MIT][license icon]][license]
 
-Plugin `ranger-oscyank` introduces a drop-in replacement (internal command
-`oscyank`) for the internal command `yank`. Besides the old integration with
+Plugin `ranger-oscyank` introduces a drop-in replacement (command `oscyank`)
+for the internal command `yank`. Besides the old integration with
 system clipboard manager tools (like `pbcopy`, `xsel`) in `yank`, `oscynak`
 enables copying text into system clipbard with [ANSI OSC52][osc52] sequence.
 
@@ -31,7 +31,7 @@ map y. oscyank name_without_extension
 
 `oscyank` supports two backends:
 
-- system clipboard manager tools, like `pbcopy`, `wl-copy`, `xsel`, etc.
+- system clipboard manager tools, like `pbcopy`, `wl-copy`, `xclip`, `xsel`.
 - ANSI OSC 52 sequence
 
 The backend selection priority is,
@@ -39,6 +39,16 @@ The backend selection priority is,
 1. OSC 52 when connecting by SSH without X forwarding
 2. Clipboard tools if any of them is available
 3. Fallback to OSC 52 if none former conditions being matched
+
+You can choose the backend explicitly with special option setting:
+
+```sh
+# Force OSC 52 copying. NOTE: don't quote the value like 'osc52'.
+set_oscyank backend osc52
+
+# or
+set_oscyank backend manager
+```
 
 Switch path styles copied with quantifiers:
 

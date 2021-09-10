@@ -2,12 +2,61 @@ from __future__ import absolute_import, division, print_function
 import os
 import subprocess
 
-# from ranger.config.commands import yank
 from ranger.api.commands import Command
+
+# from ranger.config.commands import yank
+from ranger.config.commands import set_
 
 
 class TTYNotFound(Exception):
     pass
+
+
+class set_oscyank(set_):
+    """:set_oscyank <option name>=<string>
+
+    Bypass limit of `set` that not support custom options.
+    Note: don't quote string values.
+    """
+
+    name = "set_oscyank"
+
+    def execute(self):
+        name = self.arg(1)
+        name, value, _, toggle = self.parse_setting_line_v2()
+        name = self.__class__.name[4:] + ":" + name
+        if name.endswith("?"):
+            self.fm.notify(self.fm.settings._settings.get(name[:-1], ""), 10)
+        elif toggle:
+            # self.fm.toggle_option(name)
+            self.toggle_option(name)
+        else:
+            # self.fm.set_option_from_string(name, value)
+            self.set_option_from_string(name, value)
+
+    def toggle_option(self, option_name):
+        current = self.fm.settings._settings.get(option_name, False)
+        if isinstance(current, bool):
+            self.fm.settings._settings[option_name] = not current
+        else:
+            self.fm.notify(option_name + " is not a boolean option", bad=True)
+
+    def set_option_from_string(self, option_name, value):
+        if not isinstance(value, str):
+            raise ValueError("The value for an option needs to be a string.")
+        self.fm.settings._settings[option_name] = self._parse_option_value(
+            option_name, value
+        )
+
+    def _parse_option_value(self, name, value):
+        if value.lower() in ("true", "on", "yes", "1"):
+            return True
+        if value.lower() in ("false", "off", "no", "0"):
+            return False
+        if value.lower() == "none":
+            return None
+        # All other values are strings. No int, float, list support yet
+        return value
 
 
 class oscyank(Command):
@@ -74,6 +123,12 @@ class oscyank(Command):
             process.communicate(input=content)
 
     def do_prefer_osc(self):
+        explicit_backend = self.fm.settings._settings.get("oscyank:backend", "auto")
+        if explicit_backend == "osc52":
+            return True
+        elif explicit_backend == "manager":
+            return False
+
         # X11 forwarding detection (`$DISPLAY`) is skipped. Prefer more
         # lightweighted osc_copy over SSH clipboard syncing by default.
         if (
@@ -159,6 +214,7 @@ class oscyank(Command):
             if "TMUX" in os.environ:
                 tty = self.get_tty_from_tmux()
             else:
+                self.fm.notify("No available tty is found!", bad=True)
                 raise TTYNotFound
         return tty
 
@@ -171,4 +227,3 @@ class oscyank(Command):
 
 # References
 # - https://github.com/tmux/tmux/issues/1477
-# - https://github.com/ranger/ranger/pull/2409

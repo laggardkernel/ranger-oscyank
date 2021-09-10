@@ -12,5 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New backend that copying text into system clipboard with OSC52
 - Automatic switch between backends OSC52 and clipboard tools
 - Use quantifier to switch path styles
+- Override backend with custom options.
 
 [Unreleased]: https://github.com/laggardkernel/ranger-oscyank/compare/7debe09...HEAD
