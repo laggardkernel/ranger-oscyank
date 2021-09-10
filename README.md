@@ -27,7 +27,7 @@ map yn oscyank name
 map y. oscyank name_without_extension
 ```
 
-## Details
+## Features
 
 `oscyank` supports two backends:
 
@@ -39,6 +39,14 @@ The backend selection priority is,
 1. OSC 52 when connecting by SSH without X forwarding
 2. Clipboard tools if any of them is available
 3. Fallback to OSC 52 if none former conditions being matched
+
+Switch path styles copied with quantifiers:
+
+- `1` (e.g. `1yp`): replace your home path with tilde `~`
+- `2`: strip the leading home path
+
+> quantifier: If this command was mapped to the key "X" and
+> the user pressed 6X, self.quantifier will be 6.
 
 ## License
 

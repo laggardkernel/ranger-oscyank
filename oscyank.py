@@ -2,20 +2,29 @@ from __future__ import absolute_import, division, print_function
 import os
 import subprocess
 
-from ranger.config.commands import yank
+# from ranger.config.commands import yank
+from ranger.api.commands import Command
 
 
 class TTYNotFound(Exception):
     pass
 
 
-class oscyank(yank):
+class oscyank(Command):
     """:oscyank [name|dir|path]
 
     Copies the file's name (default), directory or path into system clipboard
     with OSC 52 support. Fallbacks to default 'yank' command which uses
     the primary X selection and the clipboard.
     """
+
+    modes = {
+        "": "basename",
+        "name_without_extension": "basename_without_extension",
+        "name": "basename",
+        "dir": "dirname",
+        "path": "path",
+    }
 
     def execute(self):
         # TODO: Any way to detect OSC 52 support from terminal?
@@ -33,8 +42,29 @@ class oscyank(yank):
 
         mode = self.modes[self.arg(1)]
         selection = self.get_selection_attr(mode)
+        selection = self.process_selection(mode, selection)
         content = "\n".join(selection)
+
         copy_func(content)
+
+    def process_selection(self, mode, selection):
+        if mode.startswith("basename") or self.quantifier is None:
+            return selection
+
+        home_with_slash = os.path.expanduser("~")
+        if not home_with_slash.endswith(os.sep):
+            home_with_slash = os.path.join(home_with_slash, "")
+        length = len(home_with_slash)
+        if self.quantifier == 1:
+            selection = [
+                os.path.join("~", _[length:]) if _.startswith(home_with_slash) else _
+                for _ in selection
+            ]
+        elif self.quantifier == 2:
+            selection = [
+                _[length:] if _.startswith(home_with_slash) else _ for _ in selection
+            ]
+        return selection
 
     def clipboard_copy(self, clipboard_commands, content):
         for command in clipboard_commands:
@@ -131,6 +161,12 @@ class oscyank(yank):
             else:
                 raise TTYNotFound
         return tty
+
+    def get_selection_attr(self, attr):
+        return [getattr(item, attr) for item in self.fm.thistab.get_selection()]
+
+    def tab(self, tabnum):
+        return (self.start(1) + mode for mode in sorted(self.modes.keys()) if mode)
 
 
 # References
