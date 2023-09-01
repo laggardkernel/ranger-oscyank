@@ -134,19 +134,27 @@ class oscyank(yank):
 
         tty = self.get_tty()
         with open(tty, "wb") as fobj:
-            osc_sequence = b"\033]52;c;%s\a" % base64.b64encode(content.encode("utf-8"))
-            # Deprecation: kitty has obsolete the modified chunking protocol
-            # since 0.22. Still keep the clear sequence for backward support.
-            if (
-                "kitty" == os.environ.get("LC_TERMINAL")
-                or "KITTY_WINDOW_ID" in os.environ
-                or "xterm-kitty" == os.environ.get("TERM")
-            ):
-                osc_sequence = b"\033]52;c;!\a%s" % osc_sequence
-            if os.environ.get("TMUX"):
-                osc_sequence = b"\033Ptmux;\033%s\033\\" % osc_sequence
+            r = b""  # osc sequence
+
+            # kitty has obsolete the modified chunking protocol since 0.22.
+            # No need to keep the clear sequence for backward support.
+            # if (
+            #     "kitty" == os.environ.get("LC_TERMINAL")
+            #     or "KITTY_WINDOW_ID" in os.environ
+            #     or "xterm-kitty" == os.environ.get("TERM")
+            # ):
+            #     r += b"\033]52;c;!\a"
+
+            r += b"\033]52;c;%s\a" % base64.b64encode(content.encode("utf-8"))
+
+            # No need to passthrough escape sequence for osc 52.
+            # https://github.com/tmux/tmux/wiki/FAQ#what-is-the-passthrough-escape-sequence-and-how-do-i-use-it
+            # if os.environ.get("TMUX"):
+            #     r = r.replace(b"\033", b"\033\033")
+            #     r = b"\033Ptmux;%s\033\\" % r
+
             # TODO: size limit? Non block writing?
-            fobj.write(osc_sequence)
+            fobj.write(r)
 
     def clipboards(self):
         from ranger.ext.get_executables import get_executables
