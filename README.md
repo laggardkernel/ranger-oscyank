@@ -9,7 +9,7 @@ enables copying text into system clipbard with [ANSI OSC52][osc52] sequence.
 
 Dependency: [OSC52 support][terminal-osc52-support] in your terminal emulator.
 
-## Installation
+## QuickStart
 
 Git clone the plugin into ranger's plugin folder. (`ranger >= 1.9.3`)
 
@@ -27,9 +27,17 @@ map yn oscyank name
 map y. oscyank name_without_extension
 ```
 
+To use `ranger-oscyank` within `tmux`, enable tmux option `set-clipboard`[tmux-clipboard]
+
+```conf
+# ~/.tmux.conf, or ~/.config/tmux/tmux.conf
+set-option -g allow-passthrough on
+```
+
 ## Features
 
 ### Backend Switch
+
 `oscyank` supports two backends:
 
 - system clipboard manager tools, like `pbcopy`, `wl-copy`, `xclip`, `xsel`.
@@ -37,9 +45,9 @@ map y. oscyank name_without_extension
 
 The backend selection priority is,
 
-1. OSC 52 when connecting by SSH without X forwarding
-2. Clipboard tools if any of them is available
-3. Fallback to OSC 52 if none former conditions being matched
+1. OSC 52 when connecting thru SSH
+2. Clipboard tools if any of the above is available
+3. OSC 52 as fallback
 
 You can choose the backend explicitly with special option setting:
 
@@ -71,3 +79,4 @@ Copyright (c) 2024 laggardkernel
 [license]: https://opensource.org/licenses/MIT
 [osc52]: https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Operating-System-Commands
 [terminal-osc52-support]: https://github.com/ojroques/vim-oscyank#vim-oscyank
+[tmux-clipboard]: https://github.com/tmux/tmux/wiki/Clipboard

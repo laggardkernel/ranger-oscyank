@@ -1,9 +1,10 @@
 from __future__ import absolute_import, division, print_function
+
 import os
 import subprocess
 
 # from ranger.api.commands import Command
-from ranger.config.commands import yank, set_
+from ranger.config.commands import set_, yank
 
 
 class TTYNotFound(Exception):
@@ -118,16 +119,7 @@ class oscyank(yank):
             return True
         elif explicit_backend == "manager":
             return False
-
-        # X11 forwarding detection (`$DISPLAY`) is skipped. Prefer more
-        # lightweighted osc_copy over SSH clipboard syncing by default.
-        if (
-            "SSH_CLIENT" in os.environ
-            or "SSH_CONNECTION" in os.environ
-            and "DISPLAY" not in os.environ
-        ):
-            return True
-        return False
+        return "SSH_TTY" in os.environ
 
     def osc_copy(self, content):
         import base64
@@ -147,8 +139,9 @@ class oscyank(yank):
 
             r += b"\033]52;c;%s\a" % base64.b64encode(content.encode("utf-8"))
 
-            # No need to passthrough escape sequence for osc 52.
-            # https://github.com/tmux/tmux/wiki/FAQ#what-is-the-passthrough-escape-sequence-and-how-do-i-use-it
+            # https://github.com/tmux/tmux/wiki/Clipboard
+            # Passthrough of OSC52 seq is controlled by `allow-passthrough` in tmux.
+            #  No need to wrap the escape sequence with \ePtmux{seq}\e\\ anymore.
             # if os.environ.get("TMUX"):
             #     r = r.replace(b"\033", b"\033\033")
             #     r = b"\033Ptmux;%s\033\\" % r

@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use quantifier to switch path styles
 - Override backend with custom options.
 
+### Changed
+
+- Drop X11 clipboard syncing support, only use OSC52 for conn over SSH
+
 ### Fixed
 
 - Fix `tty` output reading
