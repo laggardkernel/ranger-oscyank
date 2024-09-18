@@ -6,6 +6,7 @@ Refs
 
 from __future__ import absolute_import, division, print_function
 
+import curses
 import os
 import subprocess
 from functools import partial
@@ -73,7 +74,6 @@ class oscyank(yank):
     """
 
     def execute(self):
-        # TODO: Any way to detect OSC 52 support from terminal?
         copy_func = None
         if self.do_prefer_osc():
             copy_func = self.osc_copy
@@ -123,7 +123,7 @@ class oscyank(yank):
             return True
         elif explicit_backend == "manager":
             return False
-        return "SSH_TTY" in os.environ
+        return "SSH_TTY" in os.environ and curses.tigetstr("Ms")
 
     def osc_copy(self, content):
         import base64

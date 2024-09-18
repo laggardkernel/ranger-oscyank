@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use quantifier to switch path styles
 - Override backend with custom options.
 - Termux support
+- Check OSC 52 support of terminals thru "Ms" termcap
 
 ### Changed
 
