@@ -65,7 +65,7 @@ Switch path styles copied with quantifiers:
 
 The MIT License (MIT)
 
-Copyright (c) 2021 laggardkernel
+Copyright (c) 2024 laggardkernel
 
 [license icon]: https://img.shields.io/badge/License-MIT-blue.svg
 [license]: https://opensource.org/licenses/MIT
