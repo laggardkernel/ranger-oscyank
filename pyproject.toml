@@ -1,0 +1,26 @@
+[project]
+name = "ranger-oscyank"
+version = "0.1.0"
+description = "Ranger plugin supporting copy with OSC 52"
+authors = [
+    {name = "laggardkernel"},
+]
+dependencies = [
+    "ranger-fm>=1.9.3",
+]
+requires-python = "==3.11.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
+
+[tool.isort]
+profile = 'black'
+skip_gitignore = true
+
+[tool.black]
+# skip-string-normalization = true
+# 'exclude' ignores all paths listed in '.gitignore' by default.
+# 'extend-exclude' excludes files or directories in addition to the defaults

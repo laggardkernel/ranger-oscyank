@@ -1,0 +1,14 @@
+# vim: ft=conf fdm=marker foldlevel=0 sw=4 ts=4 sts=4 et
+# Refs
+# - https://flake8.pycqa.org/en/latest/user/error-codes.html
+# - https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes
+[flake8]
+max-line-length = 100
+extend-exclude = venv,.venv,service_gen,ars_client,log
+extend-ignore =
+    # whitespace before ':'
+    E203,
+    # multiple statements on one line
+    E701, E704,
+    # line break before binary operator
+    W503,

@@ -1,0 +1,29 @@
+{
+  "[markdown]": {
+    "editor.tabSize": 2,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.markdownlint": "explicit",
+    },
+  },
+  "markdownlint.run": "onType",
+  "markdownlint.config": {},
+
+  "[python]": {
+    "editor.formatOnSaveMode": "file",
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  // Re-declare the default conf in project settings, in case it falls backs to
+  // global settings.
+  // https://github.com/microsoft/vscode-black-formatter/issues/519
+  "pylint.enabled": false,
+  "flake8.enabled": true,
+  "flake8.args": [],
+  "flake8.cwd": "${workspaceFolder}",
+  "black-formatter.args": [],
+  "black-formatter.cwd": "${workspaceFolder}",
+  "isort.args": []
+}

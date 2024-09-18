@@ -1,0 +1,41 @@
+# vim: ft=yaml foldlevel=0 sw=2 ts=2 sts=2 et
+# Ref
+# - https://github.com/DavidAnson/markdownlint
+# - https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.jsonc
+# - https://github.com/igorshubovych/markdownlint-cli
+# - https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# Default state for all rules
+default: true
+
+# Path to configuration file to extend
+extends: null
+
+# MD007/ul-indent - Unordered list indentation
+MD007:
+  # Why indent size defaults to 2?
+  # https:#github.com/DavidAnson/markdownlint/issues/141
+  # 2 spaces indent has compatibility issues:
+  # - multi-markdown parsers require 4-space indents
+  # - vim sleuth, polyglot have no support for 2 space auto indent with o
+  indent: 2
+
+# MD010/no-hard-tabs - Hard tabs
+MD010:
+  code_blocks: false
+
+# MD013/line-length - Line length (VSCode plugin disable this by default)
+MD013:
+  code_blocks: false
+
+# MD024/no-duplicate-heading/no-duplicate-header - Multiple headings with the same content
+MD024:
+  # Only check sibling headings
+  siblings_only: true
+
+# MD033/no-inline-html - Inline HTML
+MD033:
+  allowed_elements: ["details", "summary", "kbd"]
+
+# MD034/no-bare-urls - Bare URL used
+MD034: false
