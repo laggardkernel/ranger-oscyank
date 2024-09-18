@@ -7,12 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+None.
+
+## [0.2.0]
+
 ### Added
 
-- New backend that copying text into system clipboard with OSC52
-- Automatic switch between backends OSC52 and clipboard tools
-- Use quantifier to switch path styles
-- Override backend with custom options.
 - Termux support
 - Check OSC 52 support of terminals thru "Ms" termcap
 
@@ -22,11 +22,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix `tty` output reading
 - Drop `kitty` clear sequence, remove redundant tmux passthrough escaping
+
+## [0.1.0]
+
+### Added
+
+- New backend that copying text into system clipboard with OSC52
+- Automatic switch between backends OSC52 and clipboard tools
+- Use quantifier to switch path styles
+- Override backend with custom options.
+
+### Fixed
+
+- Fix `tty` output reading
 
 ### Removed
 
 - Remove `$TTY` envrionment variable checking
 
-[Unreleased]: https://github.com/laggardkernel/ranger-oscyank/compare/7debe09...HEAD
+[Unreleased]: https://github.com/laggardkernel/ranger-oscyank/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/laggardkernel/ranger-oscyank/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/laggardkernel/ranger-oscyank/compare/7debe09...v0.1.0
