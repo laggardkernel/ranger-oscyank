@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic switch between backends OSC52 and clipboard tools
 - Use quantifier to switch path styles
 - Override backend with custom options.
+- Termux support
 
 ### Changed
 

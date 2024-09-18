@@ -1,9 +1,15 @@
+"""
+Refs
+
+- https://github.com/tmux/tmux/issues/1477
+"""
+
 from __future__ import absolute_import, division, print_function
 
 import os
 import subprocess
+from functools import partial
 
-# from ranger.api.commands import Command
 from ranger.config.commands import set_, yank
 
 
@@ -72,11 +78,9 @@ class oscyank(yank):
         if self.do_prefer_osc():
             copy_func = self.osc_copy
         else:
-            clipboard_commands = self.clipboards()
-            if len(clipboard_commands) > 0:
-                from functools import partial
-
-                copy_func = partial(self.clipboard_copy, clipboard_commands)
+            clipboard_cmd = self.get_clipboard_cmd()
+            if clipboard_cmd:
+                copy_func = partial(self.clipboard_copy, clipboard_cmd)
         if copy_func is None:
             copy_func = self.osc_copy
 
@@ -106,12 +110,12 @@ class oscyank(yank):
             ]
         return selection
 
-    def clipboard_copy(self, clipboard_commands, content):
-        for command in clipboard_commands:
-            process = subprocess.Popen(
-                command, universal_newlines=True, stdin=subprocess.PIPE
-            )
-            process.communicate(input=content)
+    @classmethod
+    def clipboard_copy(cls, command, content):
+        process = subprocess.Popen(
+            command, universal_newlines=True, stdin=subprocess.PIPE
+        )
+        process.communicate(input=content)
 
     def do_prefer_osc(self):
         explicit_backend = self.fm.settings._settings.get("oscyank:backend", "auto")
@@ -146,33 +150,25 @@ class oscyank(yank):
             #     r = r.replace(b"\033", b"\033\033")
             #     r = b"\033Ptmux;%s\033\\" % r
 
-            # TODO: size limit? Non block writing?
+            # WARN: terminals may limit the max size of escape seq
             fobj.write(r)
 
-    def clipboards(self):
+    @classmethod
+    def get_clipboard_cmd(cls):
         from ranger.ext.get_executables import get_executables
 
-        clipboard_managers = {
-            "xclip": [
-                ["xclip"],
-                ["xclip", "-selection", "clipboard"],
-            ],
-            "xsel": [
-                ["xsel"],
-                ["xsel", "-b"],
-            ],
-            "wl-copy": [
-                ["wl-copy"],
-            ],
-            "pbcopy": [
-                ["pbcopy"],
-            ],
-        }
-        ordered_managers = ["pbcopy", "wl-copy", "xclip", "xsel"]
         executables = get_executables()
-        for manager in ordered_managers:
-            if manager in executables:
-                return clipboard_managers[manager]
+        clipboard_cmds = (
+            "pbcopy",
+            "wl-copy",
+            "termux-clipboard-get",
+            "xclip -i -selection clipboard",
+            "xsel -i --clipboard",
+        )
+        for cmd_str in clipboard_cmds:
+            cmd_list = cmd_str.split()
+            if cmd_list[0] in executables:
+                return cmd_list
         return []
 
     def get_tty_from_tmux(self):
@@ -209,7 +205,3 @@ class oscyank(yank):
                 self.fm.notify("No available tty is found!", bad=True)
                 raise TTYNotFound
         return tty
-
-
-# References
-# - https://github.com/tmux/tmux/issues/1477

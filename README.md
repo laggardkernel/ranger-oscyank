@@ -40,7 +40,8 @@ set-option -g allow-passthrough on
 
 `oscyank` supports two backends:
 
-- system clipboard manager tools, like `pbcopy`, `wl-copy`, `xclip`, `xsel`.
+- system clipboard manager tools, like `pbcopy`, `wl-copy`, `termux-clipboard-get`,
+  `xclip`, `xsel`.
 - ANSI OSC 52 sequence
 
 The backend selection priority is,
