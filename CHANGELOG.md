@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-None.
+### Changed
+
+- Use OSC52 as the only clipboard backend.
+- Warn once at startup when terminal terminfo does not advertise OSC52.
+- Reject selections over the configurable `oscyank:max_length` limit.
+- Fix tty and tmux byte parsing for OSC52 routing.
 
 ## [0.2.0]
 
