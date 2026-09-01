@@ -1,6 +1,6 @@
 [project]
 name = "ranger-oscyank"
-version = "0.1.0"
+version = "0.3.0"
 description = "Ranger plugin supporting copy with OSC 52"
 authors = [
     {name = "laggardkernel"},
