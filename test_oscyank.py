@@ -52,72 +52,17 @@ class PluginTests(unittest.TestCase):
 
     def test_over_limit_does_not_write(self):
         command = self.plugin.oscyank.__new__(self.plugin.oscyank)
+        module = __import__("oscyank_plugin.oscyank", fromlist=["open"])
         command.fm = types.SimpleNamespace(
             settings=types.SimpleNamespace(_settings={"oscyank:max_length": 1}),
             notify=lambda *args, **kwargs: setattr(command, "warning", args[0]),
         )
-        command.get_tty = lambda: self.fail("tty must not be opened")
-        command.osc_copy("é")
+        module.open = lambda *args, **kwargs: self.fail("tty must not be opened")
+        try:
+            command.osc_copy("é")
+        finally:
+            del module.open
         self.assertIn("2 bytes", command.warning)
-
-    def test_tmux_parser_chooses_active_pane(self):
-        command = self.plugin.oscyank.__new__(self.plugin.oscyank)
-        module = __import__("oscyank_plugin.oscyank", fromlist=["subprocess"])
-        original = module.subprocess.check_output
-        module.subprocess.check_output = lambda command: b"0 /dev/pts/1\n1 /dev/pts/2\n"
-        try:
-            self.assertEqual(command.get_tty_from_tmux(), "/dev/pts/2")
-        finally:
-            module.subprocess.check_output = original
-
-    def test_herdr_lookup_uses_pane_shell_tty(self):
-        command = self.plugin.oscyank.__new__(self.plugin.oscyank)
-        module = __import__("oscyank_plugin.oscyank", fromlist=["subprocess"])
-        original = module.subprocess.check_output
-        calls = []
-        outputs = [
-            b"not a tty\n",
-            b'{"result":{"process_info":{"shell_pid":27017}}}',
-            b"ttys083\n",
-        ]
-
-        def check_output(args):
-            calls.append(args)
-            return outputs.pop(0)
-
-        module.subprocess.check_output = check_output
-        try:
-            original_env = {
-                name: os.environ.get(name)
-                for name in ("HERDR_PANE_ID", "HERDR_BIN_PATH")
-            }
-            os.environ["HERDR_PANE_ID"] = "w27:p17"
-            os.environ["HERDR_BIN_PATH"] = "/opt/homebrew/bin/herdr"
-            try:
-                self.assertEqual(command.get_tty(), "/dev/ttys083")
-            finally:
-                for name, value in original_env.items():
-                    if value is None:
-                        os.environ.pop(name, None)
-                    else:
-                        os.environ[name] = value
-        finally:
-            module.subprocess.check_output = original
-
-        self.assertEqual(
-            calls,
-            [
-                ["tty"],
-                [
-                    "/opt/homebrew/bin/herdr",
-                    "pane",
-                    "process-info",
-                    "--pane",
-                    "w27:p17",
-                ],
-                ["ps", "-o", "tty=", "-p", "27017"],
-            ],
-        )
 
     def test_startup_warning_once_and_hook_delegation(self):
         fm = types.SimpleNamespace(notifications=[])

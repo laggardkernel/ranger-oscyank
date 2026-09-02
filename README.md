@@ -34,9 +34,9 @@ ensure the pane terminfo advertises `Ms`.[tmux-clipboard]
 set -s set-clipboard on
 ```
 
-The plugin writes a raw OSC52 sequence to the pane tty. tmux handles that
-sequence when `set-clipboard` is `on` (or `external`) and the `Ms` capability
-is available. `allow-passthrough` is a separate pane option for applications
+The plugin writes a raw OSC52 sequence to `/dev/tty`. tmux handles that
+sequence when `set-clipboard` is `on` and the `Ms` capability is available.
+`allow-passthrough` is a separate pane option for applications
 that send the `ESC Ptmux;... ESC \\` wrapper; this plugin does not use that
 bypass, so it does not need `allow-passthrough` enabled.
 
@@ -61,11 +61,10 @@ forwarding OSC52. The startup check is advisory: a missing `Ms` terminfo
 capability does not prove that the outer terminal cannot support OSC52, and a
 present one does not prove that it will.
 
-For tmux, use `set-clipboard on` (or `external`) and make sure `Ms` is
-present in the pane's terminfo. Screen and Herdr have their own forwarding
-behavior. In Herdr, if direct tty lookup is unavailable, the plugin uses
-`HERDR_PANE_ID` and the pane's controlling shell tty; it does not invoke a
-Herdr-specific clipboard command.
+Ranger must have a controlling terminal because the plugin writes only to
+`/dev/tty`. In tmux, screen, and Herdr, that device is the pane PTY; the plugin
+does not query a multiplexer for another tty. For tmux, use `set-clipboard on`
+and make sure `Ms` is present in the pane's terminfo.
 
 ### Quantifier
 

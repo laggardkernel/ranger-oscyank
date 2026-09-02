@@ -1,20 +1,8 @@
-"""
-Refs
-
-- https://github.com/tmux/tmux/issues/1477
-"""
-
 from __future__ import absolute_import, division, print_function
 
-import json
 import os
-import subprocess
 
 from ranger.config.commands import set_, yank
-
-
-class TTYNotFound(Exception):
-    pass
 
 
 def osc52_payload(content):
@@ -120,84 +108,5 @@ class oscyank(yank):
             )
             return
 
-        tty = self.get_tty()
-        with open(tty, "wb") as fobj:
+        with open("/dev/tty", "wb") as fobj:
             fobj.write(osc52_payload(content))
-
-    def get_tty_from_tmux(self):
-        try:
-            output = subprocess.check_output(
-                ["tmux", "list-panes", "-F", "#{pane_active} #{pane_tty}"]
-            )
-            if isinstance(output, bytes):
-                output = output.decode("utf-8", "replace")
-            for line in output.splitlines():
-                fields = line.split()
-                if len(fields) >= 2 and fields[0] == "1":
-                    return fields[1]
-        except (OSError, subprocess.CalledProcessError):
-            pass
-        raise TTYNotFound
-
-    def get_tty_from_herdr(self):
-        pane_id = os.environ.get("HERDR_PANE_ID", "").strip()
-        if not pane_id:
-            raise TTYNotFound
-
-        try:
-            herdr = os.environ.get("HERDR_BIN_PATH") or "herdr"
-            output = subprocess.check_output(
-                [herdr, "pane", "process-info", "--pane", pane_id]
-            )
-            response = json.loads(output)
-            process_info = response["result"]["process_info"]
-
-            tty = process_info.get("tty")
-            if tty and tty not in ("?", "??"):
-                return tty if tty.startswith(os.sep) else os.path.join("/dev", tty)
-
-            shell_pid = process_info.get("shell_pid")
-            if not shell_pid:
-                raise TTYNotFound
-            output = subprocess.check_output(
-                ["ps", "-o", "tty=", "-p", str(shell_pid)]
-            )
-            if isinstance(output, bytes):
-                output = output.decode("utf-8", "replace")
-            tty = output.split()[0]
-            if tty not in ("?", "??"):
-                return tty if tty.startswith(os.sep) else os.path.join("/dev", tty)
-        except (
-            AttributeError,
-            IndexError,
-            KeyError,
-            OSError,
-            TypeError,
-            ValueError,
-            subprocess.CalledProcessError,
-        ):
-            pass
-        raise TTYNotFound
-
-    def get_tty(self):
-        tty = None
-        try:
-            tty = subprocess.check_output(["tty"]).strip()
-            if isinstance(tty, bytes):
-                tty = tty.decode("utf-8", "replace")
-            if tty == "not a tty":
-                tty = None
-        except (OSError, subprocess.CalledProcessError):
-            pass
-
-        if not tty and os.environ.get("HERDR_PANE_ID"):
-            try:
-                tty = self.get_tty_from_herdr()
-            except TTYNotFound:
-                pass
-        if not tty and "TMUX" in os.environ:
-            tty = self.get_tty_from_tmux()
-        if not tty:
-            self.fm.notify("No available tty is found!", bad=True)
-            raise TTYNotFound
-        return tty
