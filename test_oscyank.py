@@ -70,6 +70,55 @@ class PluginTests(unittest.TestCase):
         finally:
             module.subprocess.check_output = original
 
+    def test_herdr_lookup_uses_pane_shell_tty(self):
+        command = self.plugin.oscyank.__new__(self.plugin.oscyank)
+        module = __import__("oscyank_plugin.oscyank", fromlist=["subprocess"])
+        original = module.subprocess.check_output
+        calls = []
+        outputs = [
+            b"not a tty\n",
+            b'{"result":{"process_info":{"shell_pid":27017}}}',
+            b"ttys083\n",
+        ]
+
+        def check_output(args):
+            calls.append(args)
+            return outputs.pop(0)
+
+        module.subprocess.check_output = check_output
+        try:
+            original_env = {
+                name: os.environ.get(name)
+                for name in ("HERDR_PANE_ID", "HERDR_BIN_PATH")
+            }
+            os.environ["HERDR_PANE_ID"] = "w27:p17"
+            os.environ["HERDR_BIN_PATH"] = "/opt/homebrew/bin/herdr"
+            try:
+                self.assertEqual(command.get_tty(), "/dev/ttys083")
+            finally:
+                for name, value in original_env.items():
+                    if value is None:
+                        os.environ.pop(name, None)
+                    else:
+                        os.environ[name] = value
+        finally:
+            module.subprocess.check_output = original
+
+        self.assertEqual(
+            calls,
+            [
+                ["tty"],
+                [
+                    "/opt/homebrew/bin/herdr",
+                    "pane",
+                    "process-info",
+                    "--pane",
+                    "w27:p17",
+                ],
+                ["ps", "-o", "tty=", "-p", "27017"],
+            ],
+        )
+
     def test_startup_warning_once_and_hook_delegation(self):
         fm = types.SimpleNamespace(notifications=[])
         fm.notify = lambda *args, **kw: fm.notifications.append(args[0])

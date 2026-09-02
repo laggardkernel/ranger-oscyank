@@ -6,6 +6,7 @@ Refs
 
 from __future__ import absolute_import, division, print_function
 
+import json
 import os
 import subprocess
 
@@ -138,6 +139,46 @@ class oscyank(yank):
             pass
         raise TTYNotFound
 
+    def get_tty_from_herdr(self):
+        pane_id = os.environ.get("HERDR_PANE_ID", "").strip()
+        if not pane_id:
+            raise TTYNotFound
+
+        try:
+            herdr = os.environ.get("HERDR_BIN_PATH") or "herdr"
+            output = subprocess.check_output(
+                [herdr, "pane", "process-info", "--pane", pane_id]
+            )
+            response = json.loads(output)
+            process_info = response["result"]["process_info"]
+
+            tty = process_info.get("tty")
+            if tty and tty not in ("?", "??"):
+                return tty if tty.startswith(os.sep) else os.path.join("/dev", tty)
+
+            shell_pid = process_info.get("shell_pid")
+            if not shell_pid:
+                raise TTYNotFound
+            output = subprocess.check_output(
+                ["ps", "-o", "tty=", "-p", str(shell_pid)]
+            )
+            if isinstance(output, bytes):
+                output = output.decode("utf-8", "replace")
+            tty = output.split()[0]
+            if tty not in ("?", "??"):
+                return tty if tty.startswith(os.sep) else os.path.join("/dev", tty)
+        except (
+            AttributeError,
+            IndexError,
+            KeyError,
+            OSError,
+            TypeError,
+            ValueError,
+            subprocess.CalledProcessError,
+        ):
+            pass
+        raise TTYNotFound
+
     def get_tty(self):
         tty = None
         try:
@@ -149,6 +190,11 @@ class oscyank(yank):
         except (OSError, subprocess.CalledProcessError):
             pass
 
+        if not tty and os.environ.get("HERDR_PANE_ID"):
+            try:
+                tty = self.get_tty_from_herdr()
+            except TTYNotFound:
+                pass
         if not tty and "TMUX" in os.environ:
             tty = self.get_tty_from_tmux()
         if not tty:

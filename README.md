@@ -63,7 +63,9 @@ present one does not prove that it will.
 
 For tmux, use `set-clipboard on` (or `external`) and make sure `Ms` is
 present in the pane's terminfo. Screen and Herdr have their own forwarding
-behavior; the plugin does not invoke a Herdr-specific clipboard command.
+behavior. In Herdr, if direct tty lookup is unavailable, the plugin uses
+`HERDR_PANE_ID` and the pane's controlling shell tty; it does not invoke a
+Herdr-specific clipboard command.
 
 ### Quantifier
 
